@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:metal="http://xml.zope.org/namespaces/metal"
+  xmlns:tal="http://xml.zope.org/namespaces/tal"
+  xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+  metal:use-macro="view.macro('arche:templates/master.pt', 'arche:templates/inline.pt')"
+  i18n:domain="arche_ttw_translation">
+<div metal:fill-slot="content" class="row">
+  <div class="col-md-12">
+    <ul>
+      <li tal:repeat="lang ttwt">
+        <a href="${request.resource_url(context, 'edit_ttw_translation', query = {'lang': lang})}">
+          ${lang} - (${len(ttwt[lang])})
+        </a>
+      </li>
+    </ul>
+    <h3 i18n:translate="">Add</h3>
+    <form action="${request.url}" method="POST">
+      <input type="text" name="lang" />
+      <input type="submit" name="add" value="Add" />
+    </form>
+  </div>
+</div>
+</html>
