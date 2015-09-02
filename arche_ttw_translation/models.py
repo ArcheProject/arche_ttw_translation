@@ -4,7 +4,7 @@ from UserDict import IterableUserDict
 from BTrees.OOBTree import OOBTree
 from arche.interfaces import IRoot
 from pyramid.threadlocal import get_current_request
-from slugify import Slugify
+from six import string_types
 from zope.component import adapter
 from zope.interface import implementer
 
@@ -17,13 +17,11 @@ _marker = object()
 class Translatable(IterableUserDict):
 
     def __call__(self, key, default = None):
-        self[key] = default
+        return key in self and self[key] or default
 
     def __setitem__(self, key, value):
-        if not value:
-            value = key
-        slugger = Slugify()
-        key = slugger(key)
+        if not isinstance(value, string_types):
+            raise ValueError("Must be a string")
         self.data[key] = value
 
 
@@ -34,7 +32,7 @@ class Translations(IterableUserDict):
     def __init__(self, context):
         self.context = context
 
-    def __call__(self, txt, request = None, lang = None, default = _marker):
+    def __call__(self, txt, default = _marker, request = None, lang = None):
         if request == None and lang == None:
             request = get_current_request()
         lang = lang and lang or request.localizer.locale_name
@@ -53,6 +51,9 @@ class Translations(IterableUserDict):
         if not isinstance(translations, dict):
             raise ValueError("Must be a dict")
         self.data[lang] = OOBTree(translations)
+
+    def __nonzero__(self):
+        return True
 
 
 def register_ttwt(config, translations):
