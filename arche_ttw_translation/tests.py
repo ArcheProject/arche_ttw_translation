@@ -4,6 +4,7 @@ from pyramid import testing
 from zope.interface.verify import verifyClass
 from zope.interface.verify import verifyObject
 from BTrees.OOBTree import OOBTree
+from arche.testing import barebone_fixture
 
 from arche_ttw_translation.interfaces import ITranslations
 
@@ -45,3 +46,28 @@ class TranslationsTests(TestCase):
         obj = self._cut(testing.DummyModel())
         obj['sv'] = {'hello': 'Hej'}
         self.assertEqual(obj('hello', request, lang = 'sv'), 'Hej')
+
+
+class IntegrationTests(TestCase):
+
+    def setUp(self):
+        self.config = testing.setUp(request = testing.DummyRequest())
+        self.config.include('arche_ttw_translation')
+
+    def tearDown(self):
+        testing.tearDown()
+
+    def test_adapter_registration(self):
+        root = barebone_fixture(self.config)
+        self.failUnless(ITranslations(root, None))
+
+    def test_register_and_call_behaviour_are_the_same(self):
+        from arche_ttw_translation.models import Translatable
+        t = Translatable()
+        t('one', 'One')
+        t('Two')
+        self.config.register_ttwt(t)
+        root = barebone_fixture(self.config)
+        tr = ITranslations(root)
+        self.assertEqual(tr('one', 'One'), 'One')
+        self.assertEqual(tr('Two'), 'Two')
