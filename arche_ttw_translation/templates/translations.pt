@@ -9,9 +9,14 @@
   <div class="col-md-12">
     <ul>
       <li tal:repeat="lang ttwt">
-        <a href="${request.resource_url(context, 'edit_ttw_translation', query = {'lang': lang})}">
-          ${lang} - (${len(ttwt[lang])})
+        <tal:def define="lang_keys frozenset(ttwt[lang].keys())">
+        <a href="${request.resource_url(context, 'edit_ttw_translation', query = {'lang': lang})}"
+          tal:attributes="title lang_keys != view.current_keys and 'Translation needs update' or ''">
+          ${lang} - (${len(lang_keys)})
+          <span tal:condition="lang_keys != view.current_keys"
+            class="glyphicon glyphicon-exclamation-sign text-warning"></span>
         </a>
+        </tal:def>
       </li>
     </ul>
     <h3 i18n:translate="">Add</h3>

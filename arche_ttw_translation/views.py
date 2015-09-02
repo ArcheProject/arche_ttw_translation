@@ -6,6 +6,7 @@ from arche.views.base import BaseView
 from pyramid.httpexceptions import HTTPForbidden
 from pyramid.httpexceptions import HTTPFound
 import colander
+from pyramid.decorator import reify
 
 from arche_ttw_translation import PERM_EDIT_TRANSLATION
 from arche_ttw_translation.interfaces import ITranslations
@@ -13,6 +14,10 @@ from arche_ttw_translation.models import get_registered_ttwt
 
 
 class TranslationsView(BaseView):
+
+    @reify
+    def current_keys(self):
+        return frozenset(get_registered_ttwt(self.request).keys())
 
     def __call__(self):
         ttwt = ITranslations(self.context)
@@ -24,10 +29,12 @@ class TranslationsView(BaseView):
             return HTTPFound(location = self.request.url)
         return {'ttwt': ttwt}
 
+
 @colander.deferred
 def edit_translations_title(node, kw):
     view = kw['view']
     return "Edit translations: %s" % view.lang
+
 
 class EditTranslations(BaseForm):
 
