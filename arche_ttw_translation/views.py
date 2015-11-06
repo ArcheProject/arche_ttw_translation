@@ -3,10 +3,9 @@ from copy import copy
 from arche.interfaces import IRoot
 from arche.views.base import BaseForm
 from arche.views.base import BaseView
-from pyramid.httpexceptions import HTTPForbidden
+from pyramid.decorator import reify
 from pyramid.httpexceptions import HTTPFound
 import colander
-from pyramid.decorator import reify
 
 from arche_ttw_translation import PERM_EDIT_TRANSLATION
 from arche_ttw_translation.interfaces import ITranslations
@@ -86,6 +85,7 @@ class EditTranslations(BaseForm):
 
 
 def includeme(config):
+    from arche.views.actions import generic_submenu_items
     config.add_view(TranslationsView,
                     context = IRoot,
                     name="ttw_translation",
@@ -96,3 +96,8 @@ def includeme(config):
                     name="edit_ttw_translation",
                     renderer = "arche:templates/form.pt",
                     permission = PERM_EDIT_TRANSLATION)
+    config.add_view_action(generic_submenu_items, 'site_menu', 'ttw_translation',
+                           title = "Translations",
+                           permission = PERM_EDIT_TRANSLATION,
+                           priority = 60,
+                           view_name = 'ttw_translation')
