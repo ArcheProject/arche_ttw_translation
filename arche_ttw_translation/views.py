@@ -21,12 +21,24 @@ class TranslationsView(BaseView):
 
     def __call__(self):
         ttwt = ITranslations(self.context)
+        redir_url = HTTPFound(location = self.request.url)
+        lang = self.request.POST.get('lang', '')
         if 'add' in self.request.POST:
-            lang = self.request.POST.get('lang')
             if len(lang) > 5:
-                raise HTTPForbidden("Too long")
-            ttwt[lang] = {}
-            return HTTPFound(location = self.request.url)
+                self.flash_messages.add("Too long", type = 'danger')
+            elif len(lang) < 2:
+                self.flash_messages.add("Too short", type = 'danger')
+            elif lang in ttwt:
+                self.flash_messages.add("Already exists", type = 'danger')
+            else: #Everything ok
+                self.flash_messages.add("Added %s" % lang, type = 'success')
+                ttwt[lang] = {}
+            return redir_url
+        if 'remove' in self.request.POST:
+            if lang in ttwt:
+                del ttwt[lang]
+                self.flash_messages.add("Removed %s" % lang, type = 'warning')
+                return redir_url
         return {'ttwt': ttwt}
 
 
