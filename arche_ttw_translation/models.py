@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 from UserDict import IterableUserDict
+from string import Template
 
 from BTrees.OOBTree import OOBTree
 from arche.interfaces import IRoot
@@ -32,12 +33,16 @@ class Translations(IterableUserDict):
     def __init__(self, context):
         self.context = context
 
-    def __call__(self, txt, default = _marker, request = None, lang = None):
+    def __call__(self, txt, default = _marker, mapping = {}, request = None, lang = None):
         if request == None and lang == None:
             request = get_current_request()
         lang = lang and lang or request.localizer.locale_name
         default = default == _marker and txt or default
-        return self.get(lang, {}).get(txt, default)
+        out = self.get(lang, {}).get(txt, default)
+        if mapping:
+            out = Template(out)
+            return out.safe_substitute(mapping)
+        return out
 
     @property
     def data(self):
