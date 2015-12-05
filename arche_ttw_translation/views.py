@@ -21,7 +21,7 @@ class TranslationsView(BaseView):
     def __call__(self):
         ttwt = ITranslations(self.context)
         redir_url = HTTPFound(location = self.request.url)
-        lang = self.request.POST.get('lang', '')
+        lang = self.request.POST.get('lang', '').lower()
         if 'add' in self.request.POST:
             if len(lang) > 5:
                 self.flash_messages.add("Too long", type = 'danger')
